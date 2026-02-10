@@ -95,23 +95,24 @@ def thai_date_picker(label, key_prefix, default_date=None, start_year_th=None):
 # ================= 3. เชื่อมต่อ Google Sheets =================
 SHEET_FILENAME = "HearingDB"
 CREDENTIALS_FILE = "credentials.json"
-
 scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
 
 try:
-    # ตรวจสอบว่ามีกุญแจใน Secrets ไหม (กรณีรันบนเว็บ)
-    if "gcp_json" in st.secrets:
-        key_dict = json.loads(st.secrets["gcp_json"])
-        creds = Credentials.from_service_account_info(key_dict, scopes=scope)
-    # ถ้าไม่มี ให้ลองหาไฟล์ในเครื่อง (กรณีรันในคอมตัวเอง)
+    # ---------------------------------------------------------
+    # เช็คว่ามี Secrets ชื่อ "gcp_service_account" ไหม?
+    # ---------------------------------------------------------
+    if "gcp_service_account" in st.secrets:
+        # ถ้ามี: อ่านค่าจาก Secrets มาใช้เลย
+        creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
     else:
+        # ถ้าไม่มี: ค่อยไปหาไฟล์ในเครื่อง (สำหรับรันในคอมตัวเอง)
         creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=scope)
-        
+    
     client = gspread.authorize(creds)
-except Exception as e:
-    st.error(f"❌ เชื่อมต่อ Google Sheet ไม่ได้: {e}")
-    st.stop()
 
+except Exception as e:
+    st.error(f"❌ เชื่อมต่อไม่ได้: {e}")
+    st.stop()
 def init_connection():
     try:
         sh = client.open(SHEET_FILENAME)
