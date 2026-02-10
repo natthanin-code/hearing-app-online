@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import gspread
+import json
 from google.oauth2.service_account import Credentials
 from datetime import datetime, date
 
@@ -97,11 +98,24 @@ CREDENTIALS_FILE = "credentials.json"
 
 scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
 
+# ================= 3. เชื่อมต่อ Google Sheets =================
+SHEET_FILENAME = "HearingDB"
+CREDENTIALS_FILE = "credentials.json"
+
+scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+
 try:
-    creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=scope)
+    # ตรวจสอบว่ามีกุญแจใน Secrets ไหม (กรณีรันบนเว็บ)
+    if "gcp_json" in st.secrets:
+        key_dict = json.loads(st.secrets["gcp_json"])
+        creds = Credentials.from_service_account_info(key_dict, scopes=scope)
+    # ถ้าไม่มี ให้ลองหาไฟล์ในเครื่อง (กรณีรันในคอมตัวเอง)
+    else:
+        creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=scope)
+        
     client = gspread.authorize(creds)
 except Exception as e:
-    st.error(f"❌ ไม่พบไฟล์กุญแจ ({CREDENTIALS_FILE})")
+    st.error(f"❌ เชื่อมต่อ Google Sheet ไม่ได้: {e}")
     st.stop()
 
 def init_connection():
