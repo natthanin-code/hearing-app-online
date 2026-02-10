@@ -98,12 +98,6 @@ CREDENTIALS_FILE = "credentials.json"
 
 scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
 
-# ================= 3. เชื่อมต่อ Google Sheets =================
-SHEET_FILENAME = "HearingDB"
-CREDENTIALS_FILE = "credentials.json"
-
-scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-
 try:
     # ตรวจสอบว่ามีกุญแจใน Secrets ไหม (กรณีรันบนเว็บ)
     if "gcp_json" in st.secrets:
