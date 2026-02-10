@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import gspread
-import json
 from google.oauth2.service_account import Credentials
 from datetime import datetime, date
 
@@ -93,23 +92,16 @@ def thai_date_picker(label, key_prefix, default_date=None, start_year_th=None):
         return None
 
 # ================= 3. เชื่อมต่อ Google Sheets =================
+SHEET_FILENAME = "HearingDB"
+CREDENTIALS_FILE = "credentials.json"
+
 scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
 
 try:
-    # ตรวจสอบว่ามีกุญแจชื่อ 'gcp_json' ใน Secrets ไหม?
-    if "gcp_json" in st.secrets:
-        # กรณีรันบน Streamlit Cloud (อ่านจาก Secrets)
-        key_dict = json.loads(st.secrets["gcp_json"])
-        creds = Credentials.from_service_account_info(key_dict, scopes=scope)
-    else:
-        # กรณีรันในเครื่องตัวเอง (อ่านจากไฟล์)
-        creds = Credentials.from_service_account_file("credentials.json", scopes=scope)
-
+    creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=scope)
     client = gspread.authorize(creds)
-
 except Exception as e:
-    st.error(f"❌ เชื่อมต่อไม่ได้: {e}")
-    st.info("คำแนะนำ: หากรันบน Cloud อย่าลืมตั้งค่า Secrets ชื่อ 'gcp_json'")
+    st.error(f"❌ ไม่พบไฟล์กุญแจ ({CREDENTIALS_FILE})")
     st.stop()
 
 def init_connection():
@@ -144,7 +136,7 @@ def load_data(worksheet):
 
 st.markdown("""
     <div style="text-align: center; padding: 20px; background: linear-gradient(90deg, #00C9FF 0%, #92FE9D 100%); border-radius: 15px; margin-bottom: 20px;">
-        <h1 style="color: white; margin:0;">👂 ระบบคัดกรองการได้ยินทารกแรกเกิด (OAE)</h1>
+        <h1 style="color: white; margin:0;">👂 ระบบคัดกรองการได้ยินทารก (OAE)</h1>
         <p style="color: white; font-size: 1.2em;">โรงพยาบาลแพร่</p>
     </div>
 """, unsafe_allow_html=True)
